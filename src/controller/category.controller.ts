@@ -31,9 +31,16 @@ export const createCategory = async (req: Request, res: Response) => {
       return;
     }
 
-    const newCategory = new Category(req.body);
+    const newCategory = new Category({
+      name: req.body.name,
+    });
     await newCategory.save();
-    res.status(201).json(newCategory);
+    newCategory.id = newCategory._id;
+    await newCategory.save();
+    res.status(201).json({
+      id: newCategory._id,
+      name: newCategory.name,
+    });
   } catch (error) {
     res.status(500).json({ error: "Failed to create category" });
   }

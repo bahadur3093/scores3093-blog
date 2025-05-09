@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { v4 as uuidv4 } from "uuid";
 
 export interface ICategory extends Document {
   id: string;
@@ -7,7 +6,7 @@ export interface ICategory extends Document {
 }
 
 const CategorySchema: Schema = new Schema({
-  id: { type: String, default: uuidv4, required: true },
+  id: { type: String },
   name: { type: String, required: true },
 });
 
