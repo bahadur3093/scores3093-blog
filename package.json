@@ -1,7 +1,7 @@
 {
   "name": "score3093-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --inspect src/server.ts",
     "build": "tsc",
