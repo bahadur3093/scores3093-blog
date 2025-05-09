@@ -2,7 +2,6 @@ import Joi from "joi";
 
 import { Category } from "../models/Categories.model";
 import { IPost } from "../models/Post.model";
-import { commentValidation } from "./comments.validation";
 
 export const postValidation = async (payload: IPost) => {
   const categories = await Category.find().lean();
@@ -29,8 +28,8 @@ export const postValidation = async (payload: IPost) => {
       "string.empty": "Content is required",
       "string.min": "Content must be at least 20 characters long",
     }),
-    comments: Joi.array().items(commentValidation).optional().messages({
-      "array.base": "Comments must be an array of comment objects",
+    cover: Joi.string().optional().messages({
+      "string.empty": "Cover is required",
     }),
   });
 

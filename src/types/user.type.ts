@@ -7,6 +7,14 @@ export interface IUser {
   email: string;
   role: UserRole
 }
+export type UserType = {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  createdAt: Date;
+  cover?: string;
+};
 
 export interface AuthRequest extends Request {
   user: IUser;

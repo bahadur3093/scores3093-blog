@@ -1,9 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
-import { IComment } from "../types/comments.type";
-import { CommentSchema } from "./Comment.model";
-
 export interface IPost extends Document {
   id: string;
   title: string;
@@ -12,7 +9,7 @@ export interface IPost extends Document {
   createdAt: Date;
   updatedAt: Date;
   category: string;
-  comments: IComment[];
+  cover?: string;
 }
 
 const PostSchema: Schema = new Schema({
@@ -23,7 +20,7 @@ const PostSchema: Schema = new Schema({
   content: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-  comments: { type: [CommentSchema], default: [] },
+  cover: { type: String, default: null },
 });
 
 export const Post = mongoose.model<IPost>("Post", PostSchema);

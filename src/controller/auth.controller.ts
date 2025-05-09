@@ -6,8 +6,10 @@ import User from "../models/User.model";
 import { UserRole } from "../constants/user.constant";
 import { AuthRequest, IUser } from "../types/user.type";
 import { generateToken } from "../utils/generateToken.util";
+import { registerUserValidation } from "../validations/users.validation";
+import { TokenBlacklist } from "../models/Blaklist.model";
 
-export const getAllUser = async (req: Request, res: Response) => {
+export const getAllUser = async (_req: Request, res: Response) => {
   try {
     const user = await User.find().lean();
     if (!user) {
@@ -23,12 +25,21 @@ export const getAllUser = async (req: Request, res: Response) => {
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
+    const { error } = await registerUserValidation(req.body);
+    if (error) {
+      res.status(400).json({ error: error.details[0].message });
+      return;
+    }
+
     const { name, email, password, role } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      res.status(400).json({ error: "User already exists" });
-
+      res.status(409).json({
+        success: false,
+        message: "User already registered. Please log in instead.",
+        alreadyRegistered: true,
+      });
       return;
     }
 
@@ -43,7 +54,18 @@ export const registerUser = async (req: Request, res: Response) => {
     });
     await newUser.save();
 
-    res.status(201).json({ message: "User registered successfully" });
+    const token = generateToken({
+      id: newUser._id,
+      email: newUser.email,
+      role: newUser.role,
+    });
+
+    res.status(201).json({
+      success: true,
+      alreadyRegistered: false,
+      message: "User registered successfully",
+      token,
+    });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -67,14 +89,18 @@ export const signUpUser = async (req: Request, res: Response) => {
       return;
     }
 
-    const token = generateToken({ id: user._id, email: user.email, role: user.role });
+    const token = generateToken({
+      id: user._id,
+      email: user.email,
+      role: user.role,
+    });
     res.json({ token });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-const authenticateJWT = (
+const authenticateJWT = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -89,6 +115,12 @@ const authenticateJWT = (
   const token = authHeader.split(" ")[1];
 
   try {
+    const blacklisted = await TokenBlacklist.findOne({ token });
+    if (blacklisted) {
+      res.status(401).json({ error: "Token has been invalidated" });
+      return;
+    }
+
     const secret = process.env.JWT_SECRET!;
     const decoded = jwt.verify(token, secret) as IUser;
 
@@ -102,4 +134,44 @@ const authenticateJWT = (
 
 export const authenticateMiddleware: RequestHandler = (req, res, next) => {
   authenticateJWT(req as any, res, next);
+};
+
+export const logoutUser = async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      res.status(401).json({ error: "No token provided" });
+      return;
+    }
+
+    const decoded = jwt.decode(token) as { exp?: number };
+    if (!decoded || !decoded.exp) {
+      res.status(400).json({ error: "Invalid token" });
+      return;
+    }
+
+    const expiresAt = new Date(decoded.exp * 1000);
+    await TokenBlacklist.create({ token, expiresAt });
+
+    res.status(200).json({ message: "User logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getUserProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId).select("-password").lean();
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+
+      return;
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
