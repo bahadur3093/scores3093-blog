@@ -71,7 +71,7 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
-export const signUpUser = async (req: Request, res: Response) => {
+export const loginUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
@@ -94,7 +94,15 @@ export const signUpUser = async (req: Request, res: Response) => {
       email: user.email,
       role: user.role,
     });
-    res.json({ token });
+    res.json({
+      user: {
+        name: user.name,
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      },
+      token,
+    });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }

@@ -9,6 +9,7 @@ export interface IPost extends Document {
   createdAt: Date;
   updatedAt: Date;
   category: string;
+  author: string;
   cover?: string;
 }
 
@@ -18,6 +19,7 @@ const PostSchema: Schema = new Schema({
   summary: { type: String, required: true },
   category: { type: String, required: true },
   content: { type: String, required: true },
+  author: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   cover: { type: String, default: null },
