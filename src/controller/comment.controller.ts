@@ -9,9 +9,16 @@ import { Reply } from "../models/Reply.model";
 
 export const getCommentsByPostId = async (req: Request, res: Response) => {
   try {
+    const post = await Post.findById(req.params.postId).lean();
+
+    if (!post) {
+      res.status(404).json({ error: "Post not found" });
+      return;
+    }
+
     const comments = await Comment.find({ postId: req.params.postId }).lean();
     if (!comments || comments.length === 0) {
-      res.status(404).json({ error: "No comments found for this post" });
+      res.status(204).json([]);
       return;
     }
 

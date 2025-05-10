@@ -175,3 +175,29 @@ export const getUserProfile = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const validateToken = async (req: AuthRequest, res: Response) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      res.status(401).json({ error: "No token provided" });
+      return;
+    }
+
+    const decoded = jwt.decode(token) as { exp?: number };
+    if (!decoded || !decoded.exp) {
+      res.status(200).json({ isValid: false });
+      return;
+    }
+
+    const expiresAt = new Date(decoded.exp * 1000);
+    if (expiresAt < new Date()) {
+      res.status(200).json({ isValid: false });
+      return;
+    }
+
+    res.status(200).json({ isValid: true });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

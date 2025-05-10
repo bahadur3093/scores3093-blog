@@ -7,6 +7,7 @@ import {
   logoutUser,
   registerUser,
   signUpUser,
+  validateToken,
 } from "../controller/auth.controller";
 
 const router = Router();
@@ -16,5 +17,6 @@ router.post("/auth/login", signUpUser);
 router.get("/auth/users", authenticateMiddleware, getAllUser);
 router.get("/auth/logout", authenticateMiddleware, logoutUser);
 router.get("/auth/user", authenticateMiddleware, getUserProfile);
+router.get("/auth/validate-token", validateToken);
 
 export default router;
