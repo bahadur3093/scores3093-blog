@@ -32,8 +32,11 @@ export const postValidation = async (payload: IPost) => {
       "string.empty": "Author is required",
       "string.min": "Author must be at least 2 characters long",
     }),
+    authorId: Joi.string().required().messages({
+      "string.empty": "Author ID cannot be empty",
+    }),
     cover: Joi.string().optional().messages({
-      "string.empty": "Cover is required",
+      "string.empty": "Cover cannot be empty",
     }),
   });
 

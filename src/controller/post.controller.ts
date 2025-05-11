@@ -2,10 +2,11 @@ import { Request, Response } from "express";
 
 import { postValidation } from "../validations/post.validation";
 import { IPost, Post } from "../models/Post.model";
+import { Types } from "mongoose";
 
 export const getAllPosts = async (_req: Request, res: Response) => {
   try {
-    const posts = await Post.find().lean();
+    const posts = await Post.find().sort({ updatedAt: -1 }).lean();
     res.json(posts);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch posts" });
@@ -21,7 +22,9 @@ export const createPost = async (req: Request, res: Response) => {
 
       return;
     }
-    const newPost = new Post(req.body);
+    const newPost = new Post({
+      ...req.body
+    });
     await newPost.save();
     res.status(201).json(newPost);
   } catch (error) {

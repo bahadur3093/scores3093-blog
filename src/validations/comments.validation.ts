@@ -23,6 +23,10 @@ export const commentValidation = Joi.object({
     .messages({
       "string.pattern.base": "Author ID must be a valid MongoDB ID",
     }),
+  author: Joi.string().required().messages({
+    "any.required": "Author name is required",
+    "string.base": "Author name must be a valid string",
+  }),
   content: Joi.string()
     .required()
     .messages({
@@ -38,10 +42,4 @@ export const commentValidation = Joi.object({
   updatedAt: Joi.date().optional().messages({
     "date.base": "Updated date must be a valid date",
   }),
-  parentCommentId: Joi.string()
-    .optional()
-    .regex(/^[a-fA-F0-9]{24}$/)
-    .messages({
-      "string.pattern.base": "Parent comment ID must be a valid MongoDB ID",
-    }),
 });

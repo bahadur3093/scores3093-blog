@@ -44,7 +44,7 @@ export const createComment = async (req: Request, res: Response) => {
 
     const comment = new Comment({
       ...req.body,
-      postId: post._id,
+      postId: post.postId,
       parentId: null,
       authorId: req.user.id || null,
       createdAt: new Date(),
@@ -130,9 +130,9 @@ export const getRepliesByCommentId = async (req: Request, res: Response) => {
     const { commentId } = req.params;
     const replies = await Reply.find({
       commentId: commentId,
-    }).lean();
+    }).sort({ updatedAt: -1 }).lean();
     if (!replies || replies.length === 0) {
-      res.status(404).json({ error: "No replies found for this comment" });
+      res.status(206).json([]);
       return;
     }
 
@@ -159,7 +159,7 @@ export const createReply = async (req: Request, res: Response) => {
     });
     await newReply.save();
 
-    res.status(201).json({ reply: newReply });
+    res.status(201).json(newReply);
   } catch (error) {
     res.status(500).json({ message: "Unable to reply to the comment", error });
   }
