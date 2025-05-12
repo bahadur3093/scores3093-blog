@@ -10,6 +10,7 @@ import postRoutes from "./routes/post.route";
 import authRoutes from "./routes/auth.route";
 import categoryRoutes from "./routes/category.route";
 import commentRoutes from "./routes/comments.routes";
+import aiRoutes from "./routes/ai.route";
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use(BASE_PATH, postRoutes);
 app.use(BASE_PATH, authRoutes);
 app.use(BASE_PATH, categoryRoutes);
 app.use(BASE_PATH, commentRoutes);
+app.use(BASE_PATH, aiRoutes);
 
 // Health check route
 app.get("/", (req, res) => {

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
+import sanitizeHtml from "sanitize-html";
 
 import { postValidation } from "../validations/post.validation";
 import { IPost, Post } from "../models/Post.model";
-import { Types } from "mongoose";
 
 export const getAllPosts = async (_req: Request, res: Response) => {
   try {
@@ -23,7 +23,7 @@ export const createPost = async (req: Request, res: Response) => {
       return;
     }
     const newPost = new Post({
-      ...req.body
+      ...req.body,
     });
     await newPost.save();
     res.status(201).json(newPost);
@@ -86,5 +86,28 @@ export const deletePost = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete post", errors: error });
+  }
+};
+
+export const updatePostContentById = async (req: Request, res: Response) => {
+  const { postId } = req.params;
+  let { content } = req.body;
+
+  try {
+    content = sanitizeHtml(content);
+    const updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      { content },
+      { new: true }
+    );
+    if (!updatedPost) {
+      res.status(404).json({ error: "Post not found" });
+      return;
+    }
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Failed to update post content", details: error });
   }
 };
